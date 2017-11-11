@@ -1,0 +1,8 @@
+class MainController {
+  constructor(){
+
+  }
+  init(){
+    
+  }
+}
