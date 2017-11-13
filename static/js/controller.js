@@ -1,9 +1,14 @@
 class MainController {
   constructor(){
-
+    this.tweets = [];
   }
   init(){
-    this.getPosts('@barackObama')
+    this.addEventListeners();
+  }
+  addEventListeners(){
+    $('#include-rt-checkbox').change(() => {
+      this.renderTweets();
+    });
   }
   search(input){
     var term = input || $('#search-input').val();
@@ -17,7 +22,8 @@ class MainController {
     .then(res => {
       this.setSearchDisabled(false);
       console.log(res);
-      return this.renderTweets(res.statuses);
+      this.tweets = res.statuses;
+      return this.renderTweets();
     })
     .catch(err => {
       this.setSearchDisabled(false);
@@ -34,18 +40,30 @@ class MainController {
       .fail(err => reject(err))
     })
   }
-  renderTweets(tweets){
+  renderTweets(){
     var container = $('#tweet-container');
+    var includeRt = $('#include-rt-checkbox').is(':checked');
+    var tweets;
+    if(!includeRt){
+      tweets = this.tweets.filter(tweet => {
+        return tweet.text.indexOf('RT') === -1;
+      })
+    } else {
+      tweets = this.tweets;
+    }
+
     container.empty();
     tweets.map(tweet => {
       var div = document.createElement('div');
       div.className = 'tweet-card';
       div.innerHTML = `
         <div class="card-col-left">
-          <img class="twitter-profile-picture" src="${tweet.user.profile_image_url}">
+          <img class="twitter-profile-picture" src="https://twitter.com/${tweet.user.screen_name}">
         </div>
         <div class="card-col-middle">
-          <strong>${tweet.user.screen_name}</strong>
+          <a class="twitter-screenname" href="${tweet.user.url}" target="_blank">
+            ${tweet.user.screen_name}
+          </a>
           <br>
           ${tweet.text}
         </div>

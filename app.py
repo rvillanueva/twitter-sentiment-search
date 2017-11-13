@@ -12,9 +12,11 @@ try:
 except ImportError:
     print('No config, using environment variables')
 
-consumer_key = os.getenv('TWITTER_CONSUMER_KEY', config.TWITTER_CONSUMER_KEY)
-consumer_secret = os.getenv('TWITTER_CONSUMER_SECRET', config.TWITTER_CONSUMER_SECRET)
-client = Client(consumer_key, consumer_secret)
+twitter_consumer_key = os.getenv('TWITTER_CONSUMER_KEY', config.TWITTER_CONSUMER_KEY)
+twitter_consumer_secret = os.getenv('TWITTER_CONSUMER_SECRET', config.TWITTER_CONSUMER_SECRET)
+client = Client(twitter_consumer_key, twitter_consumer_secret)
+aws_access_key = os.getenv('AWS_ACCESS_KEY', config.AWS_ACCESS_KEY)
+aws_access_secret = os.getenv('AWS_ACCESS_SECRET', config.AWS_ACCESS_SECRET)
 
 app = Flask(__name__)
 analyzer = SentimentIntensityAnalyzer()

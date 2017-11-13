@@ -11,7 +11,11 @@
       src="https://code.jquery.com/jquery-3.2.1.min.js"
       integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
       crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
     <style>
+      body, html {
+        font-family: 'Roboto', 'Helvetica Neue', Helvetica, sans-serif;
+      }
       .tweet-card {
         border: 1px solid rgb(219, 219, 219);
         margin: 8px 4px;
@@ -19,6 +23,9 @@
         padding: 8px 8px;
         display: flex;
         flex-direction: row;
+      }
+      .twitter-screenname {
+        font-weight: bold;
       }
       .tweet-card .card-col-left {
         width: 48px;
@@ -28,13 +35,12 @@
         vertical-align: top;
         margin: 0 20px 0 0;
       }
-      .tweet-card .card-col-right {
-        display: inline-block;
+      .tweet-card .card-col-middle {
+        flex-grow: 1;
         box-sizing: border-box;
       }
       .tweet-card .card-col-right {
         width: 80px;
-        display: inline-block;
         box-sizing: border-box;
       }
       .twitter-profile-image {
@@ -42,12 +48,13 @@
       }
       .search-container {
         padding: 12px 0;
+        text-align: center;
       }
       #search-input {
-        height: 42px;
+        height: 36px;
         font-size: 1.2em;
         width: 400px;
-        margin-left: 20px;
+        margin-right: 12px;
       }
       #search-button {
         outline: none;
@@ -82,6 +89,8 @@
     <div class="search-container">
       <form action="javascript:;" onsubmit="return controller.search()">
         <input id="search-input"><button id="search-button" type="submit">Search</button>
+        <br>
+        <input type="checkbox" id="include-rt-checkbox"> Include retweets?
       </form>
     </div>
     <div id="tweet-container"></div>
