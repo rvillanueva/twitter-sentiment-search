@@ -23,7 +23,7 @@ except ImportError:
 
 app = Flask(__name__)
 analyzer = SentimentIntensityAnalyzer()
-cycles = 2
+cycles = 3
 client = Client(twitter_consumer_key, twitter_consumer_secret)
 
 @app.route('/')
