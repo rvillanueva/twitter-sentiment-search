@@ -1,8 +1,0 @@
-class MainController {
-  constructor(){
-
-  }
-  init(){
-    
-  }
-}

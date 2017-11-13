@@ -7,6 +7,10 @@
     <title>Perch Dashboard</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
+    <script
+      src="https://code.jquery.com/jquery-3.2.1.min.js"
+      integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+      crossorigin="anonymous"></script>
 </head>
 <body>
     <!--[if lt IE 9]>
@@ -14,7 +18,7 @@
     <![endif]-->
 
     <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->
-    <script>
+    <!--<script>
       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
       m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
@@ -22,11 +26,15 @@
 
       ga('create', 'UA-XXXXX-X');
       ga('send', 'pageview');
-    </script>
+    </script>-->
+    <div class="search-container">
+      <form action="javascript:;" onsubmit="return controller.search()">
+        <input id="search-input"><button id="search-button" type="submit">Search</button>
+      </form>
+    </div>
+    <div id="tweet-container"></div>
 
-    Hello world
-
-    <script src="./scripts/controller.js"></script>
+    <script type="text/javascript" src="{{url_for('static', filename='js/controller.js', version='2017113') }}"></script>
     <script>
       var controller = new MainController();
       controller.init();

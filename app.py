@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 import twitter, json
 from urllib import parse
 from application_only_auth import Client
@@ -21,14 +21,14 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
+# API
 @app.route('/api/posts', methods=['get'])
 def returnPosts():
-    res = {}
-    res['posts'] = getTweets(term='@barackobama')
+    res = getTweets(q = request.args['q'])
     return jsonify(res)
 
-def getTweets(term):
-  query = { 'q': term }
+def getTweets(q):
+  query = { 'q': q }
   qs = parse.urlencode(query)
   url = 'https://api.twitter.com/1.1/search/tweets.json?' + qs
   tweets = client.request(url)
