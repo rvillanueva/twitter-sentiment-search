@@ -1,6 +1,6 @@
 from flask import Flask, render_template, jsonify, request
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-import twitter, json
+import json
 from urllib import parse
 from application_only_auth import Client
 import os
@@ -20,6 +20,7 @@ aws_access_secret = os.getenv('AWS_ACCESS_SECRET', config.AWS_ACCESS_SECRET)
 
 app = Flask(__name__)
 analyzer = SentimentIntensityAnalyzer()
+
 
 @app.route('/')
 def index():
