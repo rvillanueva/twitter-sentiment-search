@@ -9,14 +9,17 @@ import imp
 try:
     imp.find_module('config')
     import config
+    twitter_consumer_key = config.TWITTER_CONSUMER_KEY
+    twitter_consumer_secret = config.TWITTER_CONSUMER_SECRET
+    aws_access_key = os.getenv(config.AWS_ACCESS_KEY)
+    aws_access_secret = os.getenv(config.AWS_ACCESS_SECRET)
 except ImportError:
+    twitter_consumer_key = os.getenv('TWITTER_CONSUMER_KEY')
+    twitter_consumer_secret = os.getenv('TWITTER_CONSUMER_SECRET')
+    aws_access_key = os.getenv('AWS_ACCESS_KEY')
+    aws_access_secret = os.getenv('AWS_ACCESS_SECRET')
     print('No config, using environment variables')
 
-twitter_consumer_key = os.getenv('TWITTER_CONSUMER_KEY', config.TWITTER_CONSUMER_KEY)
-twitter_consumer_secret = os.getenv('TWITTER_CONSUMER_SECRET', config.TWITTER_CONSUMER_SECRET)
-client = Client(twitter_consumer_key, twitter_consumer_secret)
-aws_access_key = os.getenv('AWS_ACCESS_KEY', config.AWS_ACCESS_KEY)
-aws_access_secret = os.getenv('AWS_ACCESS_SECRET', config.AWS_ACCESS_SECRET)
 
 app = Flask(__name__)
 analyzer = SentimentIntensityAnalyzer()

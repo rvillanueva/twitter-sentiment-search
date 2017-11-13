@@ -58,10 +58,10 @@ class MainController {
       div.className = 'tweet-card';
       div.innerHTML = `
         <div class="card-col-left">
-          <img class="twitter-profile-picture" src="https://twitter.com/${tweet.user.screen_name}">
+          <img class="twitter-profile-picture" src="${tweet.user.profile_image_url}">
         </div>
         <div class="card-col-middle">
-          <a class="twitter-screenname" href="${tweet.user.url}" target="_blank">
+          <a class="twitter-screenname" href="https://twitter.com/${tweet.user.screen_name}" target="_blank">
             ${tweet.user.screen_name}
           </a>
           <br>
