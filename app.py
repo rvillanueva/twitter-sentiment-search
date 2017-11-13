@@ -1,4 +1,5 @@
 from flask import Flask, render_template, jsonify, request
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import twitter, json
 from urllib import parse
 from application_only_auth import Client
@@ -16,6 +17,7 @@ consumer_secret = os.getenv('TWITTER_CONSUMER_SECRET', config.TWITTER_CONSUMER_S
 client = Client(consumer_key, consumer_secret)
 
 app = Flask(__name__)
+analyzer = SentimentIntensityAnalyzer()
 
 @app.route('/')
 def index():
@@ -25,14 +27,27 @@ def index():
 @app.route('/api/posts', methods=['get'])
 def returnPosts():
     res = getTweets(q = request.args['q'])
+    res['statuses'] = analyzeTweetSentiments(res['statuses'])
     return jsonify(res)
 
 def getTweets(q):
-  query = { 'q': q }
+  query = { 'q': q, 'count': 100}
   qs = parse.urlencode(query)
   url = 'https://api.twitter.com/1.1/search/tweets.json?' + qs
-  tweets = client.request(url)
-  return tweets
+  return client.request(url)
+
+def analyzeTweetSentiments(tweets):
+    for tweet in tweets:
+      tweet['sentiment'] = analyzer.polarity_scores(tweet['text'])
+    tweets = sorted(tweets, key=getSentimentKey, reverse=True)
+    return tweets
+
+def getSentimentKey(item):
+  return item['sentiment']['compound']
+
+class SentimentTweet:
+      def __init__(self):
+        super(MySubClassBetter, self).__init__()
 
 if __name__ == '__main__':
     app.run()

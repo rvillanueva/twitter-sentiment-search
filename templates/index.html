@@ -4,13 +4,65 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <base href="/">
-    <title>Perch Dashboard</title>
+    <title>Twitter Sentiment Search</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
     <script
       src="https://code.jquery.com/jquery-3.2.1.min.js"
       integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
       crossorigin="anonymous"></script>
+    <style>
+      .tweet-card {
+        border: 1px solid rgb(219, 219, 219);
+        margin: 8px 4px;
+        border-radius: 4px;
+        padding: 8px 8px;
+        display: flex;
+        flex-direction: row;
+      }
+      .tweet-card .card-col-left {
+        width: 48px;
+        border-radius: 4px;
+        display: inline-block;
+        box-sizing: border-box;
+        vertical-align: top;
+        margin: 0 20px 0 0;
+      }
+      .tweet-card .card-col-right {
+        display: inline-block;
+        box-sizing: border-box;
+      }
+      .tweet-card .card-col-right {
+        width: 80px;
+        display: inline-block;
+        box-sizing: border-box;
+      }
+      .twitter-profile-image {
+        width: 100%;
+      }
+      .search-container {
+        padding: 12px 0;
+      }
+      #search-input {
+        height: 42px;
+        font-size: 1.2em;
+        width: 400px;
+        margin-left: 20px;
+      }
+      #search-button {
+        outline: none;
+        border: none;
+        background-color: rgb(53, 148, 209);
+        color: white;
+        border-radius: 4px;
+        font-size: 1.2em;
+        padding: 8px 12px;
+      }
+      #search-button:hover {
+        background-color: rgb(85, 171, 227);
+        cursor: pointer;
+      }
+    </style>
 </head>
 <body>
     <!--[if lt IE 9]>
