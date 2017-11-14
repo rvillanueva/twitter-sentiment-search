@@ -35,6 +35,8 @@ def index():
 def returnPosts():
     res = getTweets(q = request.args['q'])
     res['statuses'] = analyzeTweetSentiments(res['statuses'])
+    if(len(res['statuses']) > 100):
+      res['statuses'] = res['statuses'][0:100]
     return jsonify(res)
 
 def getTweets(q):
@@ -46,14 +48,12 @@ def getTweets(q):
       res['search_metadata'] = callRes['search_metadata']
     res['statuses'] = res['statuses'] + callRes['statuses']
     earliest = getEarliestTweetDate(tweets=res['statuses'])
-  if(len(res['statuses']) > 100):
-    res['statuses'] = res['statuses'][0:100]
   return res
 
 def getTweetsSingleCycle(q, untilDate):
     query = { 'q': q, 'count': 100}
     if untilDate:
-      query['util'] = str(untilDate.year) + '-' + str(untilDate.month) + '-' + str(untilDate.day)
+      query['until'] = str(untilDate.year) + '-' + str(untilDate.month) + '-' + str(untilDate.day)
     qs = parse.urlencode(query)
     url = 'https://api.twitter.com/1.1/search/tweets.json?' + qs
     return client.request(url)
