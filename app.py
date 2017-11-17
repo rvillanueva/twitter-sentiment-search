@@ -23,13 +23,17 @@ def addLabel():
     body = request.get_json()
     if(request.headers['x-auth-secret'] != config.auth_secret):
         return 'FORBIDDEN', 403
+    if(body['label'] == 'good'):
+      label = 1
+    elif(body['label'] == 'bad'):
+      label = 0
     tweet = twitter.getOneTweet(tweetId=body['tweetId'])
-    predict.addLabeledTweet(tweet=tweet, label=body['label'])
+    predict.addLabeledTweet(tweet=tweet, label=label)
     return 'OK', 200
 
 @app.route('/api/train', methods=['post'])
 def train():
-    train.train()
+    predict.train()
     return 'OK', 200
 
 if __name__ == '__main__':

@@ -9,3 +9,6 @@ def analyzeTweets(tweets):
       tweet['sentiment'] = analyzer.polarity_scores(tweet['text'])
     tweets = sorted(tweets, key=getSentimentKey, reverse=True)
     return tweets
+
+def getSentiment(text):
+  return analyzer.polarity_scores(text)

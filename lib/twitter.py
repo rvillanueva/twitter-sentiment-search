@@ -9,11 +9,11 @@ def getTweets(q, cycles):
   res = {'statuses': []};
   earliest = datetime.now()
   for i in range(cycles):
-    callRes = getTweetsSingleCycle(q=q, untilDate=earliest)
+    callRes = __getTweetsSingleCycle(q=q, untilDate=earliest)
     if(hasattr(res, 'search_metadata') == False):
       res['search_metadata'] = callRes['search_metadata']
     res['statuses'] = res['statuses'] + callRes['statuses']
-    earliest = getEarliestTweetDate(tweets=res['statuses'])
+    earliest = __getEarliestTweetDate(tweets=res['statuses'])
   return res
 
 def getOneTweet(tweetId):
@@ -23,7 +23,7 @@ def getOneTweet(tweetId):
   print(url)
   return client.request(url)
 
-def getTweetsSingleCycle(q, untilDate):
+def __getTweetsSingleCycle(q, untilDate):
     query = { 'q': q, 'count': 100}
     if untilDate:
       query['until'] = str(untilDate.year) + '-' + str(untilDate.month) + '-' + str(untilDate.day)
@@ -31,7 +31,7 @@ def getTweetsSingleCycle(q, untilDate):
     url = 'https://api.twitter.com/1.1/search/tweets.json?' + qs
     return client.request(url)
 
-def getEarliestTweetDate(tweets):
+def __getEarliestTweetDate(tweets):
     earliest = None
     for tweet in tweets:
         datetimeDate = datetime.strptime(tweet['created_at'], '%a %b %d %H:%M:%S %z %Y')
