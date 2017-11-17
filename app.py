@@ -22,7 +22,7 @@ def returnPosts():
 def addLabel():
     body = request.get_json()
     tweet = twitter.getOneTweet(tweetId=body['tweetId'])
-    predict.addLabel(tweet=tweet, label=body['label'])
+    predict.addLabeledTweet(tweet=tweet, label=body['label'])
     return 'OK'
 
 @app.route('/api/train', methods=['post'])
