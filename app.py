@@ -1,11 +1,9 @@
-import json, os
-from datetime import datetime
+import json, os, boto3, imp
+from lib import twitter, sentiment
 from flask import Flask, render_template, jsonify, request
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-from urllib import parse
 from application_only_auth import Client
 
-import imp
+
 try:
     imp.find_module('config')
     import config
@@ -22,9 +20,8 @@ except ImportError:
 
 
 app = Flask(__name__)
-analyzer = SentimentIntensityAnalyzer()
-cycles = 3
 client = Client(twitter_consumer_key, twitter_consumer_secret)
+cycles = 3
 
 @app.route('/')
 def index():
@@ -33,49 +30,11 @@ def index():
 # API
 @app.route('/api/posts', methods=['get'])
 def returnPosts():
-    res = getTweets(q = request.args['q'])
-    res['statuses'] = analyzeTweetSentiments(res['statuses'])
+    res = twitter.getTweets(q = request.args['q'], cycles = cycles, client=client)
+    res['statuses'] = sentiment.analyzeTweets(res['statuses'])
     if(len(res['statuses']) > 100):
       res['statuses'] = res['statuses'][0:100]
     return jsonify(res)
-
-def getTweets(q):
-  res = {'statuses': []};
-  earliest = datetime.now()
-  for i in range(cycles):
-    callRes = getTweetsSingleCycle(q=q, untilDate=earliest)
-    if(hasattr(res, 'search_metadata') == False):
-      res['search_metadata'] = callRes['search_metadata']
-    res['statuses'] = res['statuses'] + callRes['statuses']
-    earliest = getEarliestTweetDate(tweets=res['statuses'])
-  return res
-
-def getTweetsSingleCycle(q, untilDate):
-    query = { 'q': q, 'count': 100}
-    if untilDate:
-      query['until'] = str(untilDate.year) + '-' + str(untilDate.month) + '-' + str(untilDate.day)
-    qs = parse.urlencode(query)
-    url = 'https://api.twitter.com/1.1/search/tweets.json?' + qs
-    return client.request(url)
-
-def getEarliestTweetDate(tweets):
-    earliest = None
-    for tweet in tweets:
-        datetimeDate = datetime.strptime(tweet['created_at'], '%a %b %d %H:%M:%S %z %Y')
-        if(earliest == None):
-          earliest = datetime.now(datetimeDate.tzinfo)
-        elif(datetimeDate < earliest):
-            earliest = datetimeDate
-    return earliest
-
-def analyzeTweetSentiments(tweets):
-    for tweet in tweets:
-      tweet['sentiment'] = analyzer.polarity_scores(tweet['text'])
-    tweets = sorted(tweets, key=getSentimentKey, reverse=True)
-    return tweets
-
-def getSentimentKey(item):
-  return item['sentiment']['compound']
 
 class SentimentTweet:
       def __init__(self):
