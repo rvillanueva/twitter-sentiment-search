@@ -3,3 +3,4 @@ Flask==0.11.1
 vaderSentiment==2.5
 twitter-application-only-auth==0.3.3
 gunicorn==19.7.1
+boto3==1.4.7
