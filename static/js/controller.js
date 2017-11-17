@@ -16,7 +16,7 @@ class MainController {
       console.error('No search term provided.')
       return;
     }
-    console.log('Searching for ' + input);
+    console.log('Searching for ' + term);
     this.setSearchDisabled(true);
     this.getPosts(term)
     .then(res => {
@@ -39,6 +39,26 @@ class MainController {
       $.get('api/posts?q=' + encodeURIComponent(q), data => resolve(data))
       .fail(err => reject(err))
     })
+  }
+  addLabel(tweetId, label){
+    var secret = document.getElementById('secret-input').value
+    console.log('Labeling ' + tweetId + ' with ' + label)
+    $.ajax({
+      type: 'POST',
+      url: 'api/label',
+      data: JSON.stringify({
+        tweetId: tweetId,
+        label: label
+      }),
+      headers: {
+        'x-auth-secret': secret
+      },
+      success: () => {
+        console.log('Labeled ' + tweetId + ' ' + label);
+      },
+      contentType: 'application/json; charset=utf-8',
+      dataType: 'json'
+    });
   }
   renderTweets(){
     var container = $('#tweet-container');
@@ -70,6 +90,8 @@ class MainController {
         <div class="card-col-right">
           Sentiment: ${Math.floor(tweet.sentiment.compound * 100)/100}
           <br>
+          <a href="#" onclick="controller.addLabel('${tweet.id_str}', 'good')">Good</a>
+          <a href="#" onclick="controller.addLabel('${tweet.id_str}', 'bad')">Bad</a>
         </div>
       `;
       container.append(div);

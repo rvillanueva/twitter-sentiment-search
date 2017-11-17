@@ -97,12 +97,13 @@
       <form action="javascript:;" onsubmit="return controller.search()">
         <input id="search-input"><button id="search-button" type="submit">Search</button>
         <br>
+        <input type="password" id="secret-input">
         <input type="checkbox" id="include-rt-checkbox"> Include retweets?
       </form>
     </div>
     <div id="tweet-container"></div>
 
-    <script type="text/javascript" src="{{url_for('static', filename='js/controller.js', version='2017113') }}"></script>
+    <script type="text/javascript" src="{{url_for('static', filename='js/controller.js', version='2017-11-17') }}"></script>
     <script>
       var controller = new MainController();
       controller.init();

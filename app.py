@@ -1,14 +1,8 @@
-import json, boto3, config
-from lib import twitter, sentiment, train
+import json, config
+from lib import twitter, sentiment, predict
 from flask import Flask, render_template, jsonify, request
-from application_only_auth import Client
-
-
-
 
 app = Flask(__name__)
-twitter_client = Client(config.twitter_consumer_key, config.twitter_consumer_secret)
-#dynamodb_client = boto3.client('dynamodb')
 cycles = 3
 
 @app.route('/')
@@ -18,24 +12,23 @@ def index():
 # API
 @app.route('/api/posts', methods=['get'])
 def returnPosts():
-    res = twitter.getTweets(q = request.args['q'], cycles = cycles, client=twitter_client)
+    res = twitter.getTweets(q = request.args['q'], cycles = cycles)
     res['statuses'] = sentiment.analyzeTweets(res['statuses'])
     if(len(res['statuses']) > 100):
       res['statuses'] = res['statuses'][0:100]
     return jsonify(res)
 
 @app.route('/api/label', methods=['post'])
-def addTrainingPoint():
-    label = request.args['label']
-    tweetId = request.args['tweetId']
-    #tweet = twitter.getTweet(tweetId=tweetId)
-    #train.addTrainingTweet(tweet=tweet, label=label, client=dynamodb_client, tablename=config.aws_dynamodb_tablename)
-    return
+def addLabel():
+    body = request.get_json()
+    tweet = twitter.getOneTweet(tweetId=body['tweetId'])
+    predict.addLabel(tweet=tweet, label=body['label'])
+    return 'OK'
 
 @app.route('/api/train', methods=['post'])
 def train():
-    #train.train(dynamodb_client=dynamodb_client, tablename=config.aws_dynamodb_tablename)
-    return
+    train.train()
+    return 'OK'
 
 if __name__ == '__main__':
     app.run()
