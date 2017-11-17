@@ -16,19 +16,21 @@ def returnPosts():
     res['statuses'] = sentiment.analyzeTweets(res['statuses'])
     if(len(res['statuses']) > 100):
       res['statuses'] = res['statuses'][0:100]
-    return jsonify(res)
+    return jsonify(res), 200
 
 @app.route('/api/label', methods=['post'])
 def addLabel():
     body = request.get_json()
+    if(request.headers['x-auth-secret'] != config.auth_secret):
+        return 'FORBIDDEN', 403
     tweet = twitter.getOneTweet(tweetId=body['tweetId'])
     predict.addLabeledTweet(tweet=tweet, label=body['label'])
-    return 'OK'
+    return 'OK', 200
 
 @app.route('/api/train', methods=['post'])
 def train():
     train.train()
-    return 'OK'
+    return 'OK', 200
 
 if __name__ == '__main__':
     app.run()
