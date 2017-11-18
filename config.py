@@ -10,6 +10,7 @@ try:
     aws_access_secret = env.AWS_ACCESS_SECRET
     aws_dynamodb_tablename = env.AWS_DYNAMODB_TABLENAME
     aws_region = env.AWS_REGION
+    aws_s3_bucket=env.AWS_S3_BUCKET
 except ImportError:
     print('No config, using environment variables')
     auth_secret = os.getenv('AUTH_SECRET')
@@ -19,3 +20,4 @@ except ImportError:
     aws_access_secret = os.getenv('AWS_ACCESS_SECRET')
     aws_dynamodb_tablename = os.getenv('AWS_DYNAMODB_TABLENAME')
     aws_region= os.getenv('AWS_REGION')
+    aws_s3_bucket=os.getenv('AWS_S3_BUCKET')

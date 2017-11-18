@@ -13,7 +13,15 @@ def index():
 @app.route('/api/posts', methods=['get'])
 def returnPosts():
     res = twitter.getTweets(q = request.args['q'], cycles = cycles)
-    res['statuses'] = sentiment.analyzeTweets(res['statuses'])
+    analyzed = sentiment.analyzeTweets(res['statuses'])
+    for tweet in analyzed:
+        response = client.predict(
+            MLModelId=config.aws_ml_model,
+            Record=predict.getRecordFromTweet(tweet),
+            PredictEndpoint=config.aws_ml_endpoint
+        )
+        tweet['prediction'] = response;
+    res['statuses'] = sentiment.sortTweetsBySentiment(analyzed)
     if(len(res['statuses']) > 100):
       res['statuses'] = res['statuses'][0:100]
     return jsonify(res), 200
@@ -23,12 +31,8 @@ def addLabel():
     body = request.get_json()
     if(request.headers['x-auth-secret'] != config.auth_secret):
         return 'FORBIDDEN', 403
-    if(body['label'] == 'good'):
-      label = 1
-    elif(body['label'] == 'bad'):
-      label = 0
     tweet = twitter.getOneTweet(tweetId=body['tweetId'])
-    predict.addLabeledTweet(tweet=tweet, label=label)
+    predict.addLabeledTweet(tweet=tweet, label=body['label'])
     return 'OK', 200
 
 @app.route('/api/train', methods=['post'])
