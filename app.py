@@ -13,11 +13,12 @@ def index():
 @app.route('/api/posts', methods=['get'])
 def returnPosts():
     res = twitter.getTweets(q = request.args['q'], cycles = cycles)
-    analyzed = sentiment.analyzeTweets(res['statuses'])
-    res['statuses'] = sentiment.sortTweetsBySentiment(analyzed)
+    analyzed = sentiment.analyzeStatuses(statuses=res['statuses'])
+    res['statuses'] = sentiment.sortStatusesBySentiment(analyzed)
     if(len(res['statuses']) > 100):
       res['statuses'] = res['statuses'][0:100]
-    res['statuses'] = predict.batchPredictTweets(tweets=res['statuses'])
+    res['statuses'] = predict.batchPredictStatuses(statuses=res['statuses'])
+    res['statuses'] = predict.mergePredictions(statuses=res['statuses'])
     return jsonify(res), 200
 
 @app.route('/api/label', methods=['post'])
@@ -34,15 +35,15 @@ def train():
     predict.train()
     return 'OK', 200
 
-def addPredictionToTweets(tweets):
-  for tweet in tweets:
+def addPredictionToStatuses(statuses):
+  for status in statuses:
       response = client.predict(
           MLModelId=config.aws_ml_model,
-          Record=predict.getRecordFromTweet(tweet),
+          Record=predict.getRecordFromTweet(tweet=status['tweet']),
           PredictEndpoint=config.aws_ml_endpoint
       )
-      tweet['prediction'] = response;
-  return tweets
+      status['prediction'] = response;
+  return statuses
 
 if __name__ == '__main__':
     app.run()

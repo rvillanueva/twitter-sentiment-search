@@ -39,11 +39,11 @@ def train():
     __createMlModel(dataSourceId=dataSourceId)
     return
 
-def batchPredictTweets(tweets):
-  for t, tweet in enumerate(tweets):
-    if t < 20:
-      tweet['prediction'] = predictTweet(tweet=tweet)
-  return tweets
+def batchPredictStatuses(statuses):
+  for s, status in enumerate(statuses):
+    if s < 20:
+      status['ml_prediction'] = predictTweet(tweet=status['tweet'])
+  return statuses
 
 def predictTweet(tweet):
   record = {}
@@ -64,6 +64,17 @@ def getRecordFromTweet(tweet):
   for header, h in enumerate(headers):
     record[header] = features[h]
   return record
+
+def mergePredictions(statuses):
+  for status in statuses:
+    if(hasattr(status, 'ml_prediction')):
+      if(status['ml_prediction']['Prediction']['predictedLabel'] == 0):
+        status['score'] = 1 - status['ml_prediction']['Prediction']['predictedScores']
+      else:
+        status['score'] = status['ml_prediction']['Prediction']['predictedScores']
+    else:
+      status['score'] = (1 + status['sentiment']['compound'])/2 * 0.75
+  return statuses
 
 def __getFeaturesFromTweet(tweet):
   analyzed = sentiment.getSentiment(text=tweet['text'])

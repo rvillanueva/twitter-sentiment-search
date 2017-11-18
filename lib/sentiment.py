@@ -1,14 +1,14 @@
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 analyzer = SentimentIntensityAnalyzer()
 
-def analyzeTweets(tweets):
-    for tweet in tweets:
-      tweet['sentiment'] = analyzer.polarity_scores(tweet['text'])
-    return tweets
+def analyzeStatuses(statuses):
+    for status in statuses:
+      status['sentiment'] = analyzer.polarity_scores(status['tweet']['text'])
+    return statuses
 
-def sortTweetsBySentiment(tweets):
-    tweets = sorted(tweets, key=__getSentimentKey, reverse=True)
-    return tweets
+def sortStatusesBySentiment(statuses):
+    statuses = sorted(statuses, key=__getSentimentKey, reverse=True)
+    return statuses
 
 def getSentiment(text):
   return analyzer.polarity_scores(text)

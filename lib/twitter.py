@@ -16,7 +16,9 @@ def getTweets(q, cycles):
     tweets = tweets + callRes['statuses']
     earliest = __getEarliestTweetDate(tweets=tweets)
   for tweet in tweets:
-    res['statuses'].append(tweet)
+    res['statuses'].append({
+      'tweet': tweet
+    })
   return res
 
 def getOneTweet(tweetId):

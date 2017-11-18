@@ -22,7 +22,7 @@ class MainController {
     .then(res => {
       this.setSearchDisabled(false);
       console.log(res);
-      this.tweets = res.statuses;
+      this.statuses = res.statuses;
       return this.renderTweets();
     })
     .catch(err => {
@@ -63,37 +63,52 @@ class MainController {
   renderTweets(){
     var container = $('#tweet-container');
     var includeRt = $('#include-rt-checkbox').is(':checked');
-    var tweets;
+    var statuses;
     if(!includeRt){
-      tweets = this.tweets.filter(tweet => {
-        return tweet.text.indexOf('RT') === -1;
+      statuses = this.statuses.filter(status => {
+        return status.tweet.text.indexOf('RT') === -1;
       })
     } else {
-      tweets = this.tweets;
+      statuses = this.statuses;
     }
 
     container.empty();
-    tweets.map(tweet => {
+    statuses.map(status => {
       var div = document.createElement('div');
+      var htmlStr = '';
       div.className = 'tweet-card';
-      div.innerHTML = `
+      htmlStr = `
         <div class="card-col-left">
-          <img class="twitter-profile-picture" src="${tweet.user.profile_image_url}">
+          <img class="twitter-profile-picture" src="${status.tweet.user.profile_image_url}">
         </div>
         <div class="card-col-middle">
-          <a class="twitter-screenname" href="https://twitter.com/${tweet.user.screen_name}" target="_blank">
-            ${tweet.user.screen_name}
-          </a>
-          <br>
-          ${tweet.text}
+          <div>
+            <a class="twitter-screenname" href="https://twitter.com/${status.tweet.user.screen_name}" target="_blank">
+              ${status.tweet.user.screen_name}
+            </a>
+            <br>
+            ${status.tweet.text}
+          </div>
+          <div class="metadata-container">
+            <span class="metadata-item">Score: ${Math.floor(status.sentiment.compound * 100)/100}</span>
+      `
+      if(status.prediction){
+        htmlStr += `
+              <span class="metadata-item">Prediction: ${JSON.stringify(status.prediction.Prediction.predictedScores)}</span>
+        `
+      }
+      htmlStr += `
+            <span class="metadata-item">Sentiment: ${Math.floor(status.sentiment.compound * 100)/100}</span>
+            <span class="metadata-item">Retweets: ${status.tweet.retweet_count}</span>
+            <span class="metadata-item">Favorites: ${status.tweet.favorite_count}</span>
+          </div>
         </div>
         <div class="card-col-right">
-          Sentiment: ${Math.floor(tweet.sentiment.compound * 100)/100}
-          <br>
-          <a href="#" onclick="controller.addLabel('${tweet.id_str}', 'good')">Good</a>
-          <a href="#" onclick="controller.addLabel('${tweet.id_str}', 'bad')">Bad</a>
+          <a href="#" onclick="controller.addLabel('${status.tweet.id_str}', 'good')">Good</a>
+          <a href="#" onclick="controller.addLabel('${status.tweet.id_str}', 'bad')">Bad</a>
         </div>
       `;
+      div.innerHTML = htmlStr;
       container.append(div);
     })
   }
