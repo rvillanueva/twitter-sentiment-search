@@ -14,13 +14,6 @@ def index():
 def returnPosts():
     res = twitter.getTweets(q = request.args['q'], cycles = cycles)
     analyzed = sentiment.analyzeTweets(res['statuses'])
-    for tweet in analyzed:
-        response = client.predict(
-            MLModelId=config.aws_ml_model,
-            Record=predict.getRecordFromTweet(tweet),
-            PredictEndpoint=config.aws_ml_endpoint
-        )
-        tweet['prediction'] = response;
     res['statuses'] = sentiment.sortTweetsBySentiment(analyzed)
     if(len(res['statuses']) > 100):
       res['statuses'] = res['statuses'][0:100]
@@ -39,6 +32,16 @@ def addLabel():
 def train():
     predict.train()
     return 'OK', 200
+
+def addPredictionToTweets(tweets):
+  for tweet in tweets:
+      response = client.predict(
+          MLModelId=config.aws_ml_model,
+          Record=predict.getRecordFromTweet(tweet),
+          PredictEndpoint=config.aws_ml_endpoint
+      )
+      tweet['prediction'] = response;
+  return tweets
 
 if __name__ == '__main__':
     app.run()

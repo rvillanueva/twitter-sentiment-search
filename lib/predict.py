@@ -34,7 +34,9 @@ def addLabeledTweet(tweet, label):
     return
 
 def train():
-    __writeDynamoToS3()
+    dataSchemaLocation = __writeDynamoToS3()
+    dataSourceId = __createDataSource(dataSchemaLocation=dataSchemaLocation)['DataSourceId']
+    __createMlModel(dataSourceId=dataSourceId)
     return
 
 def predictTweet(tweet):
@@ -89,7 +91,9 @@ def __getFeatureHeaders():
 
 
 def __writeDynamoToS3():
+  print('Writing from DynamoDB to S3....')
   string = ''
+  key ='data/training-' + str(datetime.now().timestamp()) + '.csv'
   rows = []
   headers = __getFeatureHeaders()
   headers.append('label')
@@ -104,46 +108,51 @@ def __writeDynamoToS3():
 
   for r, row in enumerate(rows):
     for c, col in enumerate(row):
-      string += str(col)
+      string += str(col).replace(',',' ').replace('\n', ' ')
       if(c != len(row) - 1):
         string += ','
-    if(c != len(rows) - 1):
+    if(r != len(rows) - 1):
       string += '\n'
-  obj = s3_client.put_object(Body=string, Bucket=config.aws_s3_bucket, Key='data/training.csv')
+  obj = s3_client.put_object(Body=string, Bucket=config.aws_s3_bucket, Key=key)
+  return config.aws_s3_bucket + '/' + key
 
 
-
-## UNUSED
-def __trainMachineLearning():
-  datasource = ml_client.create_datasource_from_s3(
-    DataSourceId='tweet_sentiment_data-' + str(datetime.now().valueof()),
-    DataSourceName='Tweet Sentiment Data',
+def __createDataSource(dataSchemaLocation):
+  print('Creating s3 data source from ' + dataSchemaLocation)
+  datasource = ml_client.create_data_source_from_s3(
+    DataSourceId='tweet_sentiment_data-' + str(datetime.now().timestamp()),
+    DataSourceName='Tweet Sentiment Data, v: ' + str(datetime.now().timestamp()),
     DataSpec={
-      'DataRearrangement': 'string',
-      'DataSchema': {
+      'DataLocationS3': 's3://' + dataSchemaLocation,
+      'DataSchema': json.dumps({
+        "version": "1.0",
         "targetFieldName": "label",
         "dataFormat": "CSV",
         "dataFileContainsHeader": True,
         "attributes": [
             { "fieldName": "id", "fieldType": "CATEGORICAL" },
             { "fieldName": "text", "fieldType": "TEXT" },
-            { "fieldName": "negSentiment", "fieldType": "NUMBER" },
-            { "fieldName": "neuSentiment", "fieldType": "NUMBER" },
-            { "fieldName": "posSentiment", "fieldType": "NUMBER" },
-            { "fieldName": "compoundSentiment", "fieldType": "NUMBER" },
-            { "fieldName": "retweetSentiment", "fieldType": "NUMBER" },
-            { "fieldName": "favoriteCount", "fieldType": "NUMBER" },
-            { "fieldName": "userFollowerCount", "fieldType": "NUMBER" },
-            { "fieldName": "userFriendCount", "fieldType": "NUMBER" },
+            { "fieldName": "negSentiment", "fieldType": "NUMERIC" },
+            { "fieldName": "neuSentiment", "fieldType": "NUMERIC" },
+            { "fieldName": "posSentiment", "fieldType": "NUMERIC" },
+            { "fieldName": "compoundSentiment", "fieldType": "NUMERIC" },
+            { "fieldName": "retweetSentiment", "fieldType": "NUMERIC" },
+            { "fieldName": "favoriteCount", "fieldType": "NUMERIC" },
+            { "fieldName": "userFollowerCount", "fieldType": "NUMERIC" },
+            { "fieldName": "userFriendCount", "fieldType": "NUMERIC" },
             { "fieldName": "label", "fieldType": "BINARY" }
         ]
-      },
-      'DataSchemaLocationS3': config.aws_s3_bucket + '/data/training.csv'
-    }
+      })
+    },
+    ComputeStatistics=True
   )
-  ml_model = ml_client.create_ml_model(
-    MLModelId='twitter-sentiment-search_' + str(datetime.now().timestamp()),
-    MLModelType='BINARY',
-    TrainingDataSourceId=datasource['DataSourceId']
-  )
-  #models = dynamodb_client.scan(TableName=config.aws_dynamodb_tablename)['Items']
+  return datasource
+
+def __createMlModel(dataSourceId):
+    print('Creating ML model from ' + dataSourceId)
+    ml_model = ml_client.create_ml_model(
+      MLModelId='twitter-sentiment-search_' + str(datetime.now().timestamp()),
+      MLModelName='Twitter Sentiment Search, Model: ' + str(datetime.now().timestamp()),
+      MLModelType='BINARY',
+      TrainingDataSourceId=dataSourceId
+    )

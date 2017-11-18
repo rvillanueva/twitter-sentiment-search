@@ -11,6 +11,8 @@ try:
     aws_dynamodb_tablename = env.AWS_DYNAMODB_TABLENAME
     aws_region = env.AWS_REGION
     aws_s3_bucket=env.AWS_S3_BUCKET
+    aws_ml_model=env.AWS_ML_MODEL
+    aws_ml_endpoint=env.AWS_ML_ENDPOINT
 except ImportError:
     print('No config, using environment variables')
     auth_secret = os.getenv('AUTH_SECRET')
@@ -21,3 +23,5 @@ except ImportError:
     aws_dynamodb_tablename = os.getenv('AWS_DYNAMODB_TABLENAME')
     aws_region= os.getenv('AWS_REGION')
     aws_s3_bucket=os.getenv('AWS_S3_BUCKET')
+    aws_ml_model=os.getenv('AWS_ML_MODEL')
+    aws_ml_endpoint=os.getenv('AWS_ML_ENDPOINT')
