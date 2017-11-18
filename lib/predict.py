@@ -40,9 +40,11 @@ def train():
     return
 
 def batchPredictStatuses(statuses):
-  for s, status in enumerate(statuses):
-    if s < 20:
+  count = 0;
+  for status in statuses:
+    if (count < 50 and 'RT' not in status['tweet']['text']):
       status['ml_prediction'] = predictTweet(tweet=status['tweet'])
+      count += 1
   return statuses
 
 def predictTweet(tweet):
@@ -75,6 +77,13 @@ def mergePredictions(statuses):
     else:
       status['score'] = (1 + status['sentiment']['compound'])/2 * 0.75
   return statuses
+
+def sortStatusesByScore(statuses):
+    statuses = sorted(statuses, key=__getScoreKey, reverse=True)
+    return statuses
+
+def __getScoreKey(item):
+    return item['score']
 
 def __getFeaturesFromTweet(tweet):
   analyzed = sentiment.getSentiment(text=tweet['text'])

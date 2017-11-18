@@ -19,6 +19,7 @@ def returnPosts():
       res['statuses'] = res['statuses'][0:100]
     res['statuses'] = predict.batchPredictStatuses(statuses=res['statuses'])
     res['statuses'] = predict.mergePredictions(statuses=res['statuses'])
+    res['statuses'] = predict.sortStatusesByScore(statuses=res['statuses'])
     return jsonify(res), 200
 
 @app.route('/api/label', methods=['post'])
