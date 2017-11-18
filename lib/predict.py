@@ -39,14 +39,20 @@ def train():
     __createMlModel(dataSourceId=dataSourceId)
     return
 
+def batchPredictTweets(tweets):
+  for t, tweet in enumerate(tweets):
+    if t < 20:
+      tweet['prediction'] = predictTweet(tweet=tweet)
+  return tweets
+
 def predictTweet(tweet):
   record = {}
-  props = __getFeatureHeaders
+  props = __getFeatureHeaders()
   features = __getFeaturesFromTweet(tweet)
-  for prop, p in enumerate(props):
-    record[prop] = features[p]
-  ml_client.predict(
-    MLModelId='tweet_classifier',
+  for p, prop in enumerate(props):
+    record[prop] = str(features[p])
+  return ml_client.predict(
+    MLModelId=config.aws_ml_model,
     Record=record,
     PredictEndpoint=config.aws_ml_endpoint
   )

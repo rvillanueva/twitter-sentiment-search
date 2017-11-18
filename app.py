@@ -17,6 +17,7 @@ def returnPosts():
     res['statuses'] = sentiment.sortTweetsBySentiment(analyzed)
     if(len(res['statuses']) > 100):
       res['statuses'] = res['statuses'][0:100]
+    res['statuses'] = predict.batchPredictTweets(tweets=res['statuses'])
     return jsonify(res), 200
 
 @app.route('/api/label', methods=['post'])
