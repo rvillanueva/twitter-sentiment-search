@@ -12,39 +12,34 @@ def index():
 # API
 @app.route('/api/posts', methods=['get'])
 def returnPosts():
+    try:
+        secret = request.headers['X-Auth-Secret']
+    except:
+        secret = None
+
     res = twitter.getTweets(q = request.args['q'], cycles = cycles)
     analyzed = sentiment.analyzeStatuses(statuses=res['statuses'])
     res['statuses'] = sentiment.sortStatusesBySentiment(analyzed)
     if(len(res['statuses']) > 100):
-      res['statuses'] = res['statuses'][0:100]
-    res['statuses'] = predict.batchPredictStatuses(statuses=res['statuses'])
+        res['statuses'] = res['statuses'][0:100]
+    if(secret == config.auth_secret):
+        res['statuses'] = predict.batchPredictStatuses(statuses=res['statuses'])
     res['statuses'] = predict.mergePredictions(statuses=res['statuses'])
     res['statuses'] = predict.sortStatusesByScore(statuses=res['statuses'])
     return jsonify(res), 200
 
 @app.route('/api/label', methods=['post'])
 def addLabel():
-    body = request.get_json()
-    if(request.headers['x-auth-secret'] != config.auth_secret):
+    try:
+      secret = request.headers['X-Auth-Secret']
+    except:
+      secret = None
+    if(secret != config.auth_secret):
         return 'FORBIDDEN', 403
+    body = request.get_json()
     tweet = twitter.getOneTweet(tweetId=body['tweetId'])
     predict.addLabeledTweet(tweet=tweet, label=body['label'])
     return 'OK', 200
-
-@app.route('/api/train', methods=['post'])
-def train():
-    predict.train()
-    return 'OK', 200
-
-def addPredictionToStatuses(statuses):
-  for status in statuses:
-      response = client.predict(
-          MLModelId=config.aws_ml_model,
-          Record=predict.getRecordFromTweet(tweet=status['tweet']),
-          PredictEndpoint=config.aws_ml_endpoint
-      )
-      status['prediction'] = response;
-  return statuses
 
 if __name__ == '__main__':
     app.run()

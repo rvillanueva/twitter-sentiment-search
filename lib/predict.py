@@ -14,9 +14,9 @@ s3_client = session.client('s3')
 ml_client = session.client('machinelearning')
 
 def addLabeledTweet(tweet, label):
-    if(label == 'good'):
+    if(label == '1' or label == 1):
       binaryLabel = '1'
-    elif(label == 'bad'):
+    elif(label == '0' or label == 0):
       binaryLabel = '0'
     else:
       return
@@ -42,7 +42,7 @@ def train():
 def batchPredictStatuses(statuses):
   count = 0;
   for status in statuses:
-    if (count < 50 and 'RT' not in status['tweet']['text']):
+    if (count < 100 and 'RT' not in status['tweet']['text']):
       status['ml_prediction'] = predictTweet(tweet=status['tweet'])
       count += 1
   return statuses
@@ -70,7 +70,7 @@ def getRecordFromTweet(tweet):
 def mergePredictions(statuses):
   for status in statuses:
     if(hasattr(status, 'ml_prediction')):
-      if(status['ml_prediction']['Prediction']['predictedLabel'] == 0):
+      if(status['ml_prediction']['Prediction']['predictedLabel'] == '0'):
         status['score'] = 1 - status['ml_prediction']['Prediction']['predictedScores']
       else:
         status['score'] = status['ml_prediction']['Prediction']['predictedScores']

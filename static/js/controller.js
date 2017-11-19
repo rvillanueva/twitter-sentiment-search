@@ -1,6 +1,8 @@
 class MainController {
   constructor(){
-    this.tweets = [];
+    this.statuses = [];
+    this.labelIndex = {};
+    this.advancedMode = false;
   }
   init(){
     this.addEventListeners();
@@ -9,6 +11,12 @@ class MainController {
     $('#include-rt-checkbox').change(() => {
       this.renderTweets();
     });
+    $('#secret-input').on('input', () => {
+      if(!this.advancedMode){
+        this.advancedMode = true;
+        this.renderTweets();
+      }
+    })
   }
   search(input){
     var term = input || $('#search-input').val();
@@ -37,9 +45,21 @@ class MainController {
     $('#search-button').prop('disabled',bool);
   }
   getPosts(q){
+    var secret = document.getElementById('secret-input').value
     return new Promise((resolve, reject) => {
-      $.get('api/posts?q=' + encodeURIComponent(q), data => resolve(data))
-      .fail(err => reject(err))
+      $.ajax({
+        type: 'GET',
+        url: 'api/posts?q=' + encodeURIComponent(q),
+        headers: {
+          'x-auth-secret': secret
+        },
+        success: data => {
+          resolve(data);
+        },
+        fail: err => {
+          reject(err)
+        }
+      });
     })
   }
   addLabel(tweetId, label){
@@ -61,6 +81,8 @@ class MainController {
       contentType: 'application/json; charset=utf-8',
       dataType: 'json'
     });
+    this.labelIndex[tweetId] = label;
+    this.renderTweets();
   }
   renderTweets(){
     var container = $('#tweet-container');
@@ -92,11 +114,22 @@ class MainController {
             ${status.tweet.text}
           </div>
           <div class="metadata-container">
-            <span class="metadata-item">Score: ${Math.floor(status.sentiment.compound * 100)/100}</span>
+            <a
+              class="metadata-item"
+              href="https://twitter.com/${status.tweet.user.screen_name}/status/${status.tweet.id_str}"
+              target="_blank"
+            >View Tweet</a>
+            <span class="metadata-item">Score: ${Math.floor(status.score * 100)/100}</span>
       `
-      if(status.prediction){
+      if(status['ml_prediction']){
+        var mlScore;
+        if(status['ml_prediction'].Prediction.predictedLabel === '0'){
+          mlScore = 1 - status['ml_prediction'].Prediction.predictedScores['0']
+        } else {
+          mlScore = status['ml_prediction'].Prediction.predictedScores['1']
+        }
         htmlStr += `
-              <span class="metadata-item">Prediction: ${JSON.stringify(status.prediction.Prediction.predictedScores)}</span>
+              <span class="metadata-item">Prediction: ${Math.floor(mlScore * 100)/100}</span>
         `
       }
       htmlStr += `
@@ -105,11 +138,33 @@ class MainController {
             <span class="metadata-item">Favorites: ${status.tweet.favorite_count}</span>
           </div>
         </div>
-        <div class="card-col-right">
-          <a href="#" onclick="controller.addLabel('${status.tweet.id_str}', 'good')">Good</a>
-          <a href="#" onclick="controller.addLabel('${status.tweet.id_str}', 'bad')">Bad</a>
-        </div>
       `;
+      if(this.advancedMode){
+          htmlStr += `
+            <div class="card-col-right">
+          `
+          if(this.labelIndex[status.tweet.id_str] === 1){
+            htmlStr += `
+                Keep
+            `
+          } else {
+            htmlStr += `
+                <button href="#" onclick="controller.addLabel('${status.tweet.id_str}', 1)">Keep</button>
+            `
+          }
+          if(this.labelIndex[status.tweet.id_str] === 0){
+            htmlStr += `
+                Remove
+            `
+          } else {
+            htmlStr += `
+                <button href="#" onclick="controller.addLabel('${status.tweet.id_str}', 0)">Remove<buttona>
+            `
+          }
+          htmlStr += `
+            </div>
+          `
+      }
       div.innerHTML = htmlStr;
       container.append(div);
     })
