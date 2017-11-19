@@ -69,12 +69,12 @@ def getRecordFromTweet(tweet):
 
 def mergePredictions(statuses):
   for status in statuses:
-    if(hasattr(status, 'ml_prediction')):
+    try:
       if(status['ml_prediction']['Prediction']['predictedLabel'] == '0'):
-        status['score'] = 1 - status['ml_prediction']['Prediction']['predictedScores']
+        status['score'] = 1 - status['ml_prediction']['Prediction']['predictedScores']['0']
       else:
-        status['score'] = status['ml_prediction']['Prediction']['predictedScores']
-    else:
+        status['score'] = status['ml_prediction']['Prediction']['predictedScores']['1']
+    except:
       status['score'] = (1 + status['sentiment']['compound'])/2 * 0.75
   return statuses
 
