@@ -18,6 +18,8 @@ class MainController {
     }
     console.log('Searching for ' + term);
     this.setSearchDisabled(true);
+    this.tweets = [];
+    this.renderTweets();
     this.getPosts(term)
     .then(res => {
       this.setSearchDisabled(false);
